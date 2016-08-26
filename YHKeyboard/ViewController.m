@@ -211,6 +211,7 @@
     CGRect rect = [notification.userInfo[UIKeyboardFrameEndUserInfoKey]CGRectValue];
     double duration = [notification.userInfo[UIKeyboardAnimationDurationUserInfoKey]doubleValue] ;
     self.keyboardHeight = rect.size.height ;
+    NSLog(@"%lf",self.keyboardHeight);
     weakSelf(weakSelf);
     [UIView animateWithDuration:duration animations:^{
         [weakSelf.bgView mas_updateConstraints:^(MASConstraintMaker *make) {
