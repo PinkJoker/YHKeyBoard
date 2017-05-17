@@ -10,8 +10,9 @@
 
 @interface YHKeyBoardView : UIView
 
-
+@property(nonatomic, strong)UIView *bgView;
 @property(nonatomic, strong)UITextView *textView;
-
-
+@property(nonatomic, strong)UIButton *cancelBtn;
+@property(nonatomic, strong)UIButton *enterBtn;
+@property(nonatomic, strong)UIButton *button;
 @end

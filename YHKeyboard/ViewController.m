@@ -7,13 +7,15 @@
 //
 
 #import "ViewController.h"
-#import "Masonry.h"
-#define sWidth    self.view.frame.size.width
-#define sHeight    self.view.frame.size.height
-#define  weakSelf(R)   __weak __typeof(&*self)R = self
+
+#define kHeight   [UIScreen mainScreen].bounds.size.height
+#define kWidth   [UIScreen mainScreen].bounds.size.width
 
 @interface ViewController ()<UITextViewDelegate>
 
+
+//接口
+@property(nonatomic, assign)CGFloat BgViewHeight;
 
 @property(nonatomic, assign)CGFloat keyboardHeight;
 @property(nonatomic, strong)UIActivityIndicatorView *activeIndicator;
@@ -29,6 +31,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     self.view.backgroundColor = [UIColor whiteColor];
+  
     [self loadMyView];
     [self addObserverWithNotification];
     self.keyboardHeight = 0;//初始键盘高度
@@ -62,24 +65,26 @@
     self.bgView = [[UIView alloc]init];
     [self.view addSubview:self.bgView];
     self.bgView.backgroundColor = [UIColor magentaColor];
-    [self.bgView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.mas_equalTo(0);
-        make.right.mas_equalTo(0);
-        make.height.mas_equalTo(44);
-        make.bottom.mas_equalTo(44);
-    }];
+//    [self.bgView mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.mas_equalTo(0);
+//        make.right.mas_equalTo(0);
+//        make.height.mas_equalTo(44);
+//        make.bottom.mas_equalTo(44);
+//    }];
+    self.bgView.frame = CGRectMake(0,kHeight - 49, kWidth, 49);
     self.cancelBtn = [[UIButton alloc]init];
     [self.bgView addSubview:self.cancelBtn];
     [self.cancelBtn setTitle:@"取消" forState:UIControlStateNormal];
     [self.cancelBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [self.cancelBtn addTarget:self action:@selector(hideKeyBoard:) forControlEvents:UIControlEventTouchUpInside];
     self.cancelBtn.backgroundColor = [UIColor yellowColor];
-    [self.cancelBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.mas_equalTo(5);
-        make.top.mas_equalTo(5);
-        make.height.mas_equalTo(35);
-        make.width.mas_equalTo(60);
-    }];
+    self.cancelBtn.frame = CGRectMake(0, 10, self.bgView.bounds.size.width * 0.2, 30);
+//    [self.cancelBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.mas_equalTo(5);
+//        make.top.mas_equalTo(5);
+//        make.height.mas_equalTo(35);
+//        make.width.mas_equalTo(60);
+//    }];
     
     self.enterBtn = [[UIButton alloc]init];
     [self.bgView addSubview:self.enterBtn];
@@ -87,21 +92,23 @@
     [self.enterBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     self.enterBtn.backgroundColor = [UIColor greenColor];
     [self.enterBtn addTarget:self action:@selector(sendTextViewMessage:) forControlEvents:UIControlEventTouchUpInside];
-    [self.enterBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.right.mas_equalTo(-5);
-        make.top.mas_equalTo(5);
-        make.height.mas_equalTo(35);
-        make.width.mas_equalTo(60);
-    }];
+    self.enterBtn.frame = CGRectMake(kWidth - self.cancelBtn.bounds.size.width, 10, self.cancelBtn.bounds.size.width, self.cancelBtn.bounds.size.height);
+//    [self.enterBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.right.mas_equalTo(-5);
+//        make.top.mas_equalTo(5);
+//        make.height.mas_equalTo(35);
+//        make.width.mas_equalTo(60);
+//    }];
     self.textView = [[UITextView alloc]init];
     [self.bgView addSubview:self.textView];
     self.textView.backgroundColor = [UIColor whiteColor];
-    [self.textView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.mas_equalTo(self.cancelBtn.mas_right).offset(5);
-        make.top.mas_equalTo(0);
-        make.right.mas_equalTo(self.enterBtn.mas_left).offset(-5);
-        make.bottom.mas_equalTo(0);
-    }];
+    self.textView.frame = CGRectMake(self.cancelBtn.bounds.size.width+5, 0, self.bgView.bounds.size.width - self.cancelBtn.bounds.size.width * 2 +10, self.bgView.bounds.size.height);
+//    [self.textView mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.mas_equalTo(self.cancelBtn.mas_right).offset(5);
+//        make.top.mas_equalTo(0);
+//        make.right.mas_equalTo(self.enterBtn.mas_left).offset(-5);
+//        make.bottom.mas_equalTo(0);
+//    }];
     self.textView.font = [UIFont systemFontOfSize:16];
     self.textView.scrollEnabled = NO;
     self.textView.returnKeyType = UIReturnKeySend;
@@ -213,24 +220,47 @@
     self.keyboardHeight = rect.size.height ;
     NSLog(@"%lf",self.keyboardHeight);
     weakSelf(weakSelf);
-    [UIView animateWithDuration:duration animations:^{
-        [weakSelf.bgView mas_updateConstraints:^(MASConstraintMaker *make) {
-            make.bottom.mas_equalTo(-weakSelf.keyboardHeight);
-        }];
-        [[UIApplication sharedApplication].keyWindow addSubview:weakSelf.frontView];
+    [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
+        
+        self.bgView.transform = CGAffineTransformMakeTranslation(0, -self.keyboardHeight );
+        NSLog(@"%@",  NSStringFromCGRect(self.bgView.bounds));
+//        self.textView.transform = CGAffineTransformMakeTranslation(0, -self.keyboardHeight );
+//        self.button.transform = CGAffineTransformMakeTranslation(0, -self.keyboardHeight );
+//        self.cancelBtn.transform = CGAffineTransformMakeTranslation(0, -self.keyboardHeight );
+        
+    } completion:^(BOOL finished) {
+            [[UIApplication sharedApplication].keyWindow addSubview:weakSelf.frontView];
     }];
+//    [UIView animateWithDuration:duration animations:^{
+//        [weakSelf.bgView mas_updateConstraints:^(MASConstraintMaker *make) {
+//            make.bottom.mas_equalTo(-weakSelf.keyboardHeight);
+//        }];
+//
+//    }];
 }
 //监听系统键盘的弹出 通过masonry更改布局
 -(void)handleKeyBoardAction:(NSNotification *)notification
 {
+    CGRect frame = [notification.userInfo[UIKeyboardFrameEndUserInfoKey]CGRectValue];
     CGFloat duration = [notification.userInfo[UIKeyboardAnimationDurationUserInfoKey]doubleValue];
+//    CGFloat height = frame.size.height;
     weakSelf(weakSelf);
-    [UIView animateWithDuration:duration animations:^{
-        [weakSelf.bgView mas_updateConstraints:^(MASConstraintMaker *make) {
-            make.bottom.mas_equalTo(50);
-        }];
-         [weakSelf.frontView removeFromSuperview];
+//    [UIView animateWithDuration:duration animations:^{
+//        [weakSelf.bgView mas_updateConstraints:^(MASConstraintMaker *make) {
+//            make.bottom.mas_equalTo(50);
+//        }];
+//         [weakSelf.frontView removeFromSuperview];
+//    }];
+    [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
+        
+        self.bgView.transform = CGAffineTransformMakeTranslation(0, 0);
+        self.textView.transform = CGAffineTransformMakeTranslation(0, 0);
+        self.button.transform = CGAffineTransformMakeTranslation(0, 0);
+        self.cancelBtn.transform = CGAffineTransformMakeTranslation(0, 0);
+    } completion:^(BOOL finished) {
+          [weakSelf.frontView removeFromSuperview];
     }];
+    
 }
 
 -(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
